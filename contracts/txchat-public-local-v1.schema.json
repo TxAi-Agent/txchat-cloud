@@ -1,0 +1,95 @@
+{
+  "title": "TxChat public-local development protocol v1",
+  "type": "object",
+  "x-txchat-contract": {
+    "protocolIdentifier": "txchat.public-local.v1",
+    "routes": {
+      "account": "/public-local/v1/account",
+      "dictation": "/public-local/v1/dictation",
+      "logout": "/public-local/v1/logout",
+      "refresh": "/public-local/v1/session/refresh",
+      "session": "/public-local/v1/session"
+    },
+    "audio": {
+      "channels": 1,
+      "encoding": "pcm_s16le",
+      "maximumDurationSeconds": 300,
+      "maximumFrameBytes": 6400,
+      "sampleRate": 16000
+    }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol", "type", "audio", "organizationMode"],
+      "properties": {
+        "protocol": { "const": "txchat.public-local.v1" },
+        "type": { "const": "start" },
+        "audio": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["channels", "encoding", "sampleRate"],
+          "properties": {
+            "channels": { "const": 1 },
+            "encoding": { "const": "pcm_s16le" },
+            "sampleRate": { "const": 16000 }
+          }
+        },
+        "organizationMode": { "enum": ["smart", "verbatim"] }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol", "type"],
+      "properties": {
+        "protocol": { "const": "txchat.public-local.v1" },
+        "type": { "enum": ["finish", "cancel", "started", "organizing"] }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol", "type", "transcript"],
+      "properties": {
+        "protocol": { "const": "txchat.public-local.v1" },
+        "type": { "const": "partial" },
+        "transcript": { "type": "string", "minLength": 1, "maxLength": 4096 }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol", "type", "transcript", "organizedText"],
+      "properties": {
+        "protocol": { "const": "txchat.public-local.v1" },
+        "type": { "const": "final" },
+        "transcript": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "organizedText": { "type": "string", "minLength": 1, "maxLength": 4096 }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol", "type", "code"],
+      "properties": {
+        "protocol": { "const": "txchat.public-local.v1" },
+        "type": { "const": "failed" },
+        "code": {
+          "enum": ["invalid_audio", "invalid_message", "invalid_sequence", "limit_exceeded"]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol", "type", "reason"],
+      "properties": {
+        "protocol": { "const": "txchat.public-local.v1" },
+        "type": { "const": "ended" },
+        "reason": { "enum": ["cancelled", "completed", "failed"] }
+      }
+    }
+  ]
+}
